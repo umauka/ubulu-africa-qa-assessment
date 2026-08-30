@@ -65,7 +65,11 @@ export const test = base.extend({
     await use({ id: bookingid, booking });
 
     const res = await deleteBooking(request, bookingid, authedApi.token);
-    if (!res.ok() && res.status() !== 404) {
+    // 404 is the sane "already gone" response; 405 is what the API actually
+    // returns for a missing/already-deleted booking (BUG-2, tracked in
+    // crud.spec.js) — tolerated here so a test that deletes its own seeded
+    // booking mid-test doesn't fail teardown on the redundant delete.
+    if (!res.ok() && res.status() !== 404 && res.status() !== 405) {
       throw new Error(`Teardown failed to delete booking ${bookingid}: ${res.status()}`);
     }
   },
