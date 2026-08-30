@@ -37,11 +37,11 @@ Running `npx playwright test` twice in a row leaves the booking count unchanged 
 - **No fixture/mock data library** (e.g. Faker). A small custom random-data builder (`api-tests/helpers/data-builders.js`) was enough for this suite's size and keeps the dependency footprint minimal.
 - **CI test sharding (bonus) doesn't merge into one combined HTML report.** Each of the 2 shards uploads its own report/results artifacts. Merging via Playwright's blob reporter is the standard mechanism, but it's extra moving parts that aren't justified for a 16-test suite — worth revisiting if the suite grows substantially.
 - **ESLint config is intentionally minimal** (`eslint.config.mjs`, `@eslint/js` recommended rules only) since there was no pre-existing project convention to match.
-- Part 1 and Part 6 deliverables (test plan, test cases, AI critique/utility docs, bug report, video) are tracked separately and out of scope for this section, which covers Part 2 + Part 5 only.
+- Part 1 and Part 6 deliverables (test plan, test cases, AI critique/utility docs) are tracked separately and out of scope for this section, which covers Part 2 + Part 5 only.
 
 ## Known-bug / expected-failure policy
 
-Restful Booker has real, reproducible defects (see `Bug-Report.docx` for the full list — BUG-1 through BUG-6). When a test uncovers one, the assertion is kept **strict** — it encodes the spec-correct expected behavior, never softened to force a pass. Instead, `test.fail(true, 'BUG-n: <what's wrong>')` is called at the top of that one test, with a comment giving expected vs. actual behavior, and the test stays in the suite permanently so it keeps exercising the broken behavior on every run.
+Restful Booker has real, reproducible defects (see `docs/Bug-Report.pdf` for the full list, with severities and repro steps — BUG-1 through BUG-6). When a test uncovers one, the assertion is kept **strict** — it encodes the spec-correct expected behavior, never softened to force a pass. Instead, `test.fail(true, 'BUG-n: <what's wrong>')` is called at the top of that one test, with a comment giving expected vs. actual behavior, and the test stays in the suite permanently so it keeps exercising the broken behavior on every run.
 
 This keeps CI meaningful instead of permanently red because of accepted, tracked defects:
 
