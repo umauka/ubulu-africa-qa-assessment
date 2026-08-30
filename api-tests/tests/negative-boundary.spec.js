@@ -9,7 +9,7 @@ test.describe('Negative and boundary input handling', () => {
     // actually persisted despite the 500, so no cleanup is needed here.
     test.fail(true, 'BUG-3: POST /booking with a missing required field returns 500 instead of 400');
 
-    const { firstname, ...incomplete } = randomBooking();
+    const { firstname: _firstname, ...incomplete } = randomBooking();
     const res = await createBooking(request, incomplete);
     expect(res.status()).toBe(400);
   });

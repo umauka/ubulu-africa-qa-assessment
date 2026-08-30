@@ -8,6 +8,9 @@ export const test = base.extend({
   // fixture (a worker-scoped fixture can't depend on a test-scoped one), used
   // only to mint the auth token once per worker.
   apiRequestContext: [
+    // Playwright requires the destructured object literal here (even with no
+    // dependencies) to detect this fixture's dependency list at the source level.
+    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       const context = await pwRequest.newContext({ baseURL: env.baseURL });
       await use(context);

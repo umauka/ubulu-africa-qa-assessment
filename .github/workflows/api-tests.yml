@@ -1,0 +1,115 @@
+name: API Tests
+
+on:
+  push:
+  pull_request:
+  # Bonus: nightly full run independent of push/PR activity, to catch
+  # environment drift (e.g. a Restful Booker image update) and re-confirm
+  # the known-bug baseline (BUG-1..6) even on days with no commits.
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  # --- Parallelization notes -------------------------------------------------
+  # `lint` and `validate-suite` share no dependency on each other or on a live
+  # Restful Booker instance, so they run in parallel as soon as the workflow
+  # starts. `test` genuinely cannot start until the Restful Booker service
+  # container is up, and there's no point running the full suite against code
+  # that doesn't even lint/parse cleanly — so `test` is gated on both via
+  # `needs:` rather than run alongside them.
+  # ----------------------------------------------------------------------------
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  # This project is plain JavaScript by design (no TypeScript), so there's no
+  # typecheck step to run alongside lint. In its place, this job makes
+  # Playwright parse every spec/fixture/helper file and resolve all imports
+  # (`--list` discovers tests without running them or needing a live Restful
+  # Booker instance) — a fast smoke check that runs fully in parallel with lint.
+  validate-suite:
+    name: Validate suite (test discovery)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npx playwright test --list
+
+  test:
+    name: API tests (shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    needs: [lint, validate-suite]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
+    services:
+      restful-booker:
+        image: mwinteringham/restfulbooker
+        ports:
+          - 3001:3001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+
+      - name: Wait for Restful Booker to be ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3001/ping && exit 0
+            sleep 1
+          done
+          echo "Restful Booker did not become ready in time" >&2
+          exit 1
+
+      # Known-bug handling: BUG-1..6 are tracked with test.fail() directly in
+      # api-tests/tests/*.spec.js (see each file for the specific defect).
+      # Playwright's own exit code already gives the right CI signal for
+      # this, so no soft-fail/continue-on-error hack is needed here:
+      #   - a test.fail() test that fails (the bug is still present) counts
+      #     as a PASS for exit-code purposes
+      #   - a test.fail() test that unexpectedly PASSES (the bug got fixed)
+      #     counts as a FAILURE, surfacing the fix so the test can be
+      #     promoted out of test.fail() and the bug closed
+      #   - any other, untagged test failing is a FAILURE as normal
+      # So `npx playwright test`'s exit code means "matches current known
+      # state, including documented bugs" (0) vs. "real regression or a
+      # tracked bug just got fixed" (non-zero) — never a false red for a
+      # known, accepted defect.
+      - name: Run Playwright API tests
+        run: npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      # Uploaded unconditionally (pass or fail) so the HTML report and any
+      # failure traces/screenshots are always available for review.
+      - name: Upload Playwright HTML report (shard ${{ matrix.shardIndex }})
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.shardIndex }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test results (traces, screenshots, JSON/JUnit)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.shardIndex }}
+          path: test-results/
+          retention-days: 30
