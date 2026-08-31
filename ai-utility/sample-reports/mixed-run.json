@@ -1,0 +1,111 @@
+{
+  "config": {},
+  "suites": [
+    {
+      "title": "",
+      "suites": [
+        {
+          "title": "auth.spec.js",
+          "specs": [
+            {
+              "title": "creates a token with valid credentials",
+              "file": "auth.spec.js",
+              "tests": [
+                {
+                  "status": "unexpected",
+                  "expectedStatus": "passed",
+                  "annotations": [],
+                  "results": [
+                    {
+                      "status": "failed",
+                      "errors": [
+                        {
+                          "message": "Error: connect ECONNREFUSED 127.0.0.1:3001\n  at TCPConnectWrap.afterConnect"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "crud.spec.js",
+          "specs": [
+            {
+              "title": "DELETE returns a REST-correct success status",
+              "file": "crud.spec.js",
+              "tests": [
+                {
+                  "status": "expected",
+                  "expectedStatus": "failed",
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "BUG-1: DELETE /booking/{id} returns 201 Created instead of 200/204"
+                    }
+                  ],
+                  "results": [
+                    {
+                      "status": "failed",
+                      "errors": [{ "message": "Error: expect(received).toContain(expected)\n\nExpected value: 201\nReceived array: [200, 204]" }]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "deleting an already-deleted booking returns 404",
+              "file": "crud.spec.js",
+              "tests": [
+                {
+                  "status": "unexpected",
+                  "expectedStatus": "failed",
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "BUG-2: DELETE on a missing booking returns 405 instead of 404"
+                    }
+                  ],
+                  "results": [
+                    { "status": "passed", "errors": [] }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "filtering.spec.js",
+          "specs": [
+            {
+              "title": "GET /booking filtered by checkin/checkout date range returns exactly the matching bookings",
+              "file": "filtering.spec.js",
+              "tests": [
+                {
+                  "status": "flaky",
+                  "expectedStatus": "passed",
+                  "annotations": [],
+                  "results": [
+                    { "status": "failed", "errors": [{ "message": "Error: expect(received).toContain(expected)" }] },
+                    { "status": "passed", "errors": [] }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-08-31T09:00:00.000Z",
+    "duration": 842.5,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 1
+  }
+}

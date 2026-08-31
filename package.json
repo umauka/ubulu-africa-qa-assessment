@@ -6,7 +6,8 @@
   "scripts": {
     "test": "playwright test",
     "test:report": "playwright show-report",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "triage": "node --env-file=.env ai-utility/triage-report.mjs"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,8 @@
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
     "zod": "^4.5.4"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0"
   }
 }
