@@ -2,7 +2,7 @@
 
 ## Walkthrough video
 
-[Walkthrough video](TODO: add link) — *placeholder, to be added.*
+[Walkthrough video](https://www.loom.com/share/99c975834c6a4e749ca5b55b16cb1b68) — recommend watching at 1.25x-1.5x speed.
 
 ## Chosen electives: Part 2 (API test automation) + Part 5 (CI/CD)
 
