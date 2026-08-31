@@ -41,7 +41,7 @@ Running `npx playwright test` twice in a row leaves the booking count unchanged 
 
 ## Known-bug / expected-failure policy
 
-Restful Booker has real, reproducible defects (see `docs/Bug-Report.pdf` for the full list, with severities and repro steps — BUG-1 through BUG-6). When a test uncovers one, the assertion is kept **strict** — it encodes the spec-correct expected behavior, never softened to force a pass. Instead, `test.fail(true, 'BUG-n: <what's wrong>')` is called at the top of that one test, with a comment giving expected vs. actual behavior, and the test stays in the suite permanently so it keeps exercising the broken behavior on every run.
+Restful Booker has real, reproducible defects (see `docs/Restful_Booker_Bug_Report.pdf` for the full list, with severities and repro steps — BUG-1 through BUG-6). When a test uncovers one, the assertion is kept **strict** — it encodes the spec-correct expected behavior, never softened to force a pass. Instead, `test.fail(true, 'BUG-n: <what's wrong>')` is called at the top of that one test, with a comment giving expected vs. actual behavior, and the test stays in the suite permanently so it keeps exercising the broken behavior on every run.
 
 This keeps CI meaningful instead of permanently red because of accepted, tracked defects:
 
